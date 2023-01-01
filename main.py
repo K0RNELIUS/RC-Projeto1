@@ -152,22 +152,22 @@ class ServerApp:
     def sendMsgClient(self, msg, client): # mandar msgs de erro diretas
         self.clients[client].sendMsg(msg)
 
-    def nickClientHandler(self, clientAddr, args):
+    def nickClientHandler(self, clientAddr, args): # NICK
         pass
 
-    def newClientHandler(self, clientAddr, args):
+    def newClientHandler(self, clientAddr, args): # USER
         pass
 
-    def deleteClientHandler(self, clientAddr, args):
+    def deleteClientHandler(self, clientAddr, args): # QUIT
         pass
 
-    def subscribeChannelHandler(self, clientAddr, args):
+    def subscribeChannelHandler(self, clientAddr, args): # JOIN
         pass
 
-    def unsubscribeChannelHandler(self, clientAddr, args):
+    def unsubscribeChannelHandler(self, clientAddr, args): # PART
         pass
 
-    def listChannelHandler(self, clientAddr, args):
+    def listChannelHandler(self, clientAddr, args): # LIST
 
         pass
 
