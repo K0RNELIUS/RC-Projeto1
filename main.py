@@ -75,12 +75,12 @@ class ServerApp:
         self.canais = {"": ServerChannel("")}
 
         # registra handlers para comandos
-        self.handlers = {"NICK": self.nickClientHandler,
-                         "USUARIO": self.newClientHandler,
-                         "SAIR": self.deleteClientHandler,
-                         "ENTRAR": self.subscribeChannelHandler,
-                         "SAIRC": self.unsubscribeChannelHandler,
-                         "LISTAR": self.listChannelHandler,
+        self.handlers = {"NICK": self.nickClientHandler, # NICK
+                         "USUARIO": self.newClientHandler, # USER
+                         "SAIR": self.deleteClientHandler, # QUIT
+                         "ENTRAR": self.subscribeChannelHandler, # JOIN
+                         "SAIRC": self.unsubscribeChannelHandler, # PART
+                         "LISTAR": self.listChannelHandler, # LIST
                          }
         # requisita API do SO uma conexão AF_INET (IPV4)
         #   com protocolo de transporte SOCK_STREAM (TCP)
@@ -148,6 +148,9 @@ class ServerApp:
     def sendMsgChannel(self, msg, channel):
         for client in self.canais[channel].clients:
             self.clients[client].sendMsg(msg)
+
+    def sendMsgClient(self, msg, client): # mandar msgs de erro diretas
+        self.clients[client].sendMsg(msg)
 
     def nickClientHandler(self, clientAddr, args):
         pass
