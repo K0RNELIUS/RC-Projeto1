@@ -149,6 +149,11 @@ class ServerApp:
         for client in self.canais[channel].clients:
             self.clients[client].sendMsg(msg)
 
+    def sendMsgChannelButClient(self, msg, channel, clientAddr):
+        for client in self.canais[channel].clients:
+            if client != clientAddr:
+                self.clients[client].sendMsg(msg)
+
     def sendMsgClient(self, msg, client): # mandar msgs de erro diretas
         self.clients[client].sendMsg(msg)
 
@@ -158,8 +163,12 @@ class ServerApp:
     def newClientHandler(self, clientAddr, args): # USER
         pass
 
-    def deleteClientHandler(self, clientAddr, channelAddr): # QUIT
-        pass
+    def deleteClientHandler(self, clientAddr): # QUIT
+        # remover user do server, canal (deixa de existir na plataforma) e reportar
+        canalCliente = self.clients[clientAddr].channel # salva canal do user
+        del self.clients[clientAddr] # remove user do server
+        del self.canais[canalCliente].clients[clientAddr] # apaga user do canal
+        self.sendMsgChannel(self, f'User {clientAddr} saiu.', canalCliente)
 
     def subscribeChannelHandler(self, clientAddr, args): # JOIN
         pass
@@ -176,9 +185,15 @@ class ServerApp:
             self.sendMsgClient(self, "Canal n existe ou o cliente n pertence ao canal esspecificado", clientAddr)
 
     def listChannelHandler(self, clientAddr, args): # LIST
-
         pass
 
+    def privateMsg(self, sender, clientOrChannelAddr, message):
+        if clientOrChannelAddr in self.canais: # destino eh canal
+            self.sendMsgChannelButClient(self, message, clientOrChannelAddr, sender)
+        elif clientOrChannelAddr in self.clients: # destinho eh user
+            self.sendMsgClient(self, message, clientOrChannelAddr)
+        else:
+            self.sendMsgClient(self, "Erro", sender)
 
 def processo2():
     # Cria servidor e escuta clients
