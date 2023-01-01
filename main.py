@@ -158,14 +158,22 @@ class ServerApp:
     def newClientHandler(self, clientAddr, args): # USER
         pass
 
-    def deleteClientHandler(self, clientAddr, args): # QUIT
+    def deleteClientHandler(self, clientAddr, channelAddr): # QUIT
         pass
 
     def subscribeChannelHandler(self, clientAddr, args): # JOIN
         pass
 
-    def unsubscribeChannelHandler(self, clientAddr, args): # PART
-        pass
+    def unsubscribeChannelHandler(self, clientAddr, channelAddr): # PART
+        # erros possiveis: n existir o cliente ou canal no server
+        # ou dentro do canal o user n pertencer
+        if channelAddr in self.canais and clientAddr in self.canais[channelAddr].clients:
+            # ao verificar que existe user no channel posso usar del
+            del self.canais[channelAddr].clients[clientAddr] # desvincula user do canal
+            self.clients[clientAddr].channel = None  # desvincula canal do user
+            self.sendMsgChannel(self, f'User {clientAddr} saiu do canal {channelAddr}.', channelAddr)
+        else:
+            self.sendMsgClient(self, "Canal n existe ou o cliente n pertence ao canal esspecificado", clientAddr)
 
     def listChannelHandler(self, clientAddr, args): # LIST
 
