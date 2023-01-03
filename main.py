@@ -187,13 +187,23 @@ class ServerApp:
     def listChannelHandler(self, clientAddr, args): # LIST
         pass
 
-    def privateMsg(self, sender, clientOrChannelAddr, message):
+    def privateMsg(self, requester, clientOrChannelAddr, message):
         if clientOrChannelAddr in self.canais: # destino eh canal
-            self.sendMsgChannelButClient(self, message, clientOrChannelAddr, sender)
+            self.sendMsgChannelButClient(self, message, clientOrChannelAddr, requester)
         elif clientOrChannelAddr in self.clients: # destinho eh user
             self.sendMsgClient(self, message, clientOrChannelAddr)
         else:
-            self.sendMsgClient(self, "Erro", sender)
+            self.sendMsgClient(self, "Erro", requester)
+
+    def who(self, channelAddr, requester):
+        if channelAddr in self.canais:
+            clients = ""
+            for client in self.canais[channelAddr].clients:
+                clients += ", " + client
+            clients = "Os usuários " + clients[2:] + "pertencem ao canal " + channelAddr + "." #fatiamento tira primeira virgula
+            self.sendMsgClient(self, clients, requester)
+        else: # Erro
+            self.sendMsgClient(self, "Erro", requester)
 
 def processo2():
     # Cria servidor e escuta clients
