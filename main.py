@@ -157,11 +157,20 @@ class ServerApp:
     def sendMsgClient(self, msg, client): # mandar msgs de erro diretas
         self.clients[client].sendMsg(msg)
 
-    def nickClientHandler(self, clientAddr, args): # NICK
-        pass
+    def nickClientHandler(self, clientAddr, entrada_nick): # NICK
+        if entrada_nick in self.clients:
+            self.sendMsgClient(self, 'O nickname desejado já está sendo usado.', clientAddr)
+        else:
+            self.clients[clientAddr].nickname = entrada_nick
 
-    def newClientHandler(self, clientAddr, args): # USER
-        pass
+    def newClientHandler(self, client, args): #USER
+        if len(args) < 3:
+            return "Invalid parameters for USUARIO command"
+        else:
+            client.nickname = args[0]
+            client.hostname = args[1]
+            client.realname = " ".join(args[2:])
+            return ""
 
     def deleteClientHandler(self, clientAddr): # QUIT
         # remover user do server, canal (deixa de existir na plataforma) e reportar
@@ -170,8 +179,11 @@ class ServerApp:
         del self.canais[canalCliente].clients[clientAddr] # apaga user do canal
         self.sendMsgChannel(self, f'User {clientAddr} saiu.', canalCliente)
 
-    def subscribeChannelHandler(self, clientAddr, args): # JOIN
-        pass
+    def subscribeChannelHandler(self, clientAddr, canal): # JOIN
+        if self.clients[clientAddr].channel in self.canais:
+            self.unsubscribeChannelHandler(clientAddr, self.clients[clientAddr].channel)
+
+        self.clients[clientAddr].channel = canal
 
     def unsubscribeChannelHandler(self, clientAddr, channelAddr): # PART
         # erros possiveis: n existir o cliente ou canal no server
@@ -184,8 +196,17 @@ class ServerApp:
         else:
             self.sendMsgClient(self, "Canal n existe ou o cliente n pertence ao canal esspecificado", clientAddr)
 
-    def listChannelHandler(self, clientAddr, args): # LIST
-        pass
+    def listChannelHandler(self, client, parameters): # LIST
+        response = "Channels:\r\n"
+        # for channel_name, channel in self.canais.items():
+            # Problema: response += f"{channelname} ({len(channel.clients)} users)\r\n"
+        return response
+
+    #A função LIST irá gerar uma resposta listando todos os canais e o número de usuários em cada canal.
+    #Para enviar esta resposta para o cliente usamos a função sendMessage
+    def sendMessage(self, msg):
+        for client in self.clients.items():
+            client.sendMsg(msg)
 
     def privateMsg(self, requester, clientOrChannelAddr, message):
         if clientOrChannelAddr in self.canais: # destino eh canal
