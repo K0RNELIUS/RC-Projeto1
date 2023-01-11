@@ -76,11 +76,13 @@ class ServerApp:
 
         # registra handlers para comandos
         self.handlers = {"NICK": self.nickClientHandler, # NICK
-                         "USUARIO": self.newClientHandler, # USER
-                         "SAIR": self.deleteClientHandler, # QUIT
-                         "ENTRAR": self.subscribeChannelHandler, # JOIN
-                         "SAIRC": self.unsubscribeChannelHandler, # PART
-                         "LISTAR": self.listChannelHandler, # LIST
+                         "USER": self.newClientHandler, # USER
+                         "QUIT": self.deleteClientHandler, # QUIT
+                         "JOIN": self.subscribeChannelHandler, # JOIN
+                         "PART": self.unsubscribeChannelHandler, # PART
+                         "LIST": self.listChannelHandler, # LIST
+                         "PRIVMSG": self.privateMsg,  # PRIVMSG
+                         "WHO": self.who,  # WHO
                          }
         # requisita API do SO uma conexão AF_INET (IPV4)
         #   com protocolo de transporte SOCK_STREAM (TCP)
