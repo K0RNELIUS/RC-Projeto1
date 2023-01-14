@@ -18,6 +18,30 @@ serversocket
 conexao
 '''
 
+class Client:
+    def __init__(self, nickname, realname, host, port):
+        # Instancia socket cliente
+        self.clientsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        # Atributos
+        self.nickname = nickname
+        self.realname = realname
+        self.channelConnected = None
+
+        # Conecta cliente ao servidor
+        self.clientsocket.connect((host, port))
+
+        # Processa comandos
+        message = input("?")
+        while message.lower().strip() != 'bye':
+            self.clientsocket.send(message.encode("utf-8"))  # envia
+            data = self.clientsocket.recv(1024).decode("utf-8")  # recebe
+            print('Received from server: ' + data)
+            message = input("?")
+
+        # Ao receber quit, fecha conexao com server
+        self.clientsocket.close()  # close the connection
+
 class Canal:
     def __init__(self, nomecanal):
         self.nomecanal = nomecanal
@@ -45,22 +69,28 @@ class Servidor:
                          "WHO": self.who,  # WHO
                          }
 
-        # Conecta cliente ao servidor
-        self.serversocket.bind((host, port))
+        # Processamento das infos do cliente
+        self.run()
 
-        # Aceita conexao do cliente e adiciona no dicionario de clientes
-        conn, address = self.serversocket.accept() # hostname, port retornado do metodo
-        print(conn)
-        print(address)
-        if address not in self.clientesServidor.keys():
-            self.clientesServidor[address] = conn
+        def run():
+            # Conecta cliente ao servidor
+            self.serversocket.bind((host, port))
 
-        # Recebe comandos
-        data = conn.recv(1024).decode("utf-8")
-        data_lista = data.split()
-        # Invoca metodos dos comandos
-        retorno_metodo = self.handlers[data_lista[0]](address, data_lista[1:])
-        conn.send(retorno_metodo.encode("utf-8"))  # devolve retorno dos metodos para cliente
+            # Aceita conexao do cliente e adiciona no dicionario de clientes
+            conn, address = self.serversocket.accept() # hostname, port retornado do metodo
+            print(conn)
+            print(address)
+            if address not in self.clientesServidor.keys():
+                self.clientesServidor[address] = Client(conn.send("Preencha o seu Nick abaixo:".encode("utf-8")),
+                                                        conn.send("Preencha o seu realname abaixo:".encode("utf-8")),
+                                                        socket.gethostname(), 5000)
+
+            # Recebe comandos
+            data = conn.recv(1024).decode("utf-8")
+            data_lista = data.split()
+            # Invoca metodos dos comandos
+            retorno_metodo = self.handlers[data_lista[0]](address, data_lista[1:])
+            conn.send(retorno_metodo.encode("utf-8"))  # devolve retorno dos metodos para cliente
 
     def nickClientHandler(self, address, nickname): # NICK
         '''Dar um apelido ao user ou alterar anterior. Deve checar existencia do novo apelido.

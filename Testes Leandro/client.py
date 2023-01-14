@@ -21,9 +21,10 @@ class Client:
             print('Received from server: ' + data)
             message = input("?")
 
-        # Ao receber quit, fecha conexao com server
+        # Ao receber bye, fecha conexao com server
         self.clientsocket.close()  # close the connection
 
 
 if __name__ == '__main__':
-    Client("Leandro", "Leandro Beloti Kornelius", socket.gethostname(), 5000)
+    Client()
+    # Client("Leandro", "Leandro Beloti Kornelius", socket.gethostname(), 5000)
