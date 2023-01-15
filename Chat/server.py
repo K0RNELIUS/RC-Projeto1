@@ -3,13 +3,16 @@ import socket
 
 def nickClientHandler(address, nickname_novo, dicAddresses, dicClientes, dicCanais):  # NICK
     nickname_velho = dicAddresses[address][0]
-    if nickname_novo in dicClientes.keys():
+    if nickname_novo == nickname_velho:
+        return "Nick especificado ja e o seu"
+    elif nickname_novo in dicClientes.keys():
         return "Nickname indisponivel"
     else:
         dicAddresses[address][0] = nickname_novo
         for canal in dicCanais.keys():
-            if nickname_novo in dicCanais[canal]:
-                dicCanais[canal].replace(nickname_velho, nickname_novo)
+            if nickname_velho in dicCanais[canal]:
+                ind = dicCanais[canal].index(nickname_velho)
+                dicCanais[canal][ind] = nickname_novo
         info_nickname = dicClientes[nickname_velho]
         del dicClientes[nickname_velho]
         dicClientes[nickname_novo] = info_nickname
@@ -22,7 +25,7 @@ def nameClientHandler(address, name_novo, dicAddresses, dicClientes):  # NAME
     return "Operacao concluida"
 
 
-def newClientHandler(address, dicAddresses, dicClientes): # USER
+def newClientHandler(address, dicAddresses, dicClientes):  # USER
     usuario = dicAddresses[address][0]
     if usuario in dicClientes.keys():
         return f'Nickname: {usuario}\nName: {dicClientes[usuario][0]}\nHost: {dicClientes[usuario][1]}\nPorta: {dicClientes[usuario][2]}'
@@ -43,7 +46,7 @@ def quitHandler(address, dicAddresses, dicClientes, dicCanais):
             conn.send(msg.encode())
 
 
-def subscribeChannelHandler(address, canal, dicAddresses, dicCanais): # JOIN
+def subscribeChannelHandler(address, canal, dicAddresses, dicCanais):  # JOIN
     usuario = dicAddresses[address][0]
     if canal not in dicCanais.keys():
         return 'O canal nao existe'
@@ -143,8 +146,8 @@ def server_program(cond):
     clientes = {}
     canais = {"CANAL1": [], "CANAL2": [], "CANAL3": []}
 
-    server_socket = socket.socket() # instancia servidor
-    server_socket.bind((host, port))  # une host e port juntos
+    server_socket = socket.socket()  # instancia servidor
+    server_socket.bind((host, port))   # une host e port juntos
 
     server_socket.listen(3)
     conn, address = server_socket.accept()  # aceita nova conexao
@@ -195,6 +198,11 @@ def server_program(cond):
 
         if comando_enviar_unico or canal_teste:
             conn.send(data.encode())  # envia data ao usuario
+
+        '''# Testes das funcs dos comandos
+        print(addressclientes)
+        print(clientes)
+        print(canais)'''
 
 
 if __name__ == '__main__':
